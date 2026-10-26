@@ -1,0 +1,34 @@
+# ==============================================================================
+# CrimeVision AI - Core Forensic Intelligence Dependencies
+# SmartBridge EL Capstone Project | Gaurav Raturi
+# Milestone 1: Project Initialization & Environment Configuration
+# ==============================================================================
+
+# Web Framework & CORS
+Flask>=3.0.0
+flask-cors>=4.0.0
+
+# Deep Learning Core & Computer Vision
+torch>=2.2.0
+torchvision>=0.17.0
+torchaudio>=2.2.0
+ultralytics>=8.1.0
+transformers>=4.38.0
+pillow>=10.0.0
+opencv-python-headless>=4.9.0
+
+# Speech & Acoustic Forensics
+openai-whisper>=20231117
+
+# GenAI Reasoning & Cloud LPU Acceleration
+groq>=0.9.0
+
+# Court-Admissible Forensic PDF Engine
+reportlab>=4.1.0
+
+# Data Processing & Utilities
+numpy>=1.26.0
+pandas>=2.2.0
+pydantic>=2.6.0
+python-dotenv>=1.0.1
+requests>=2.31.0

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrimeVision AI — Intelligent Multimodal Forensic Analysis Platform</title>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js and OrbitControls from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <!-- Header Bar -->
+    <header class="header-bar">
+        <div class="brand-section">
+            <div class="brand-logo">🛡️</div>
+            <div>
+                <div class="brand-title">CrimeVision AI</div>
+                <div class="brand-subtitle">Multimodal Forensic Intelligence Platform | SmartBridge Capstone — Gaurav Raturi</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span>CHAIN OF CUSTODY VERIFIED (SHA-256)</span>
+            </div>
+            <a href="/api/export-pdf" class="btn btn-sm btn-crimson" id="header-pdf-btn">
+                📄 Export Dossier (PDF)
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="container">
+        
+        <!-- Case Information KPI Banner -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-meta">Case Identifier</div>
+                <div class="kpi-val" id="case-id-display">CV-2026-0891</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-meta">Lead Detective</div>
+                <div class="kpi-val">Det. Special Agent</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-meta">Offense Classification</div>
+                <div class="kpi-val" id="crime-class-display">Armed Robbery (§ 211)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-meta">Evidence Confidence Score</div>
+                <div class="kpi-val text-emerald" id="confidence-display">91.5%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-meta">Threat Severity Level</div>
+                <div class="kpi-val text-crimson" id="severity-display">CRITICAL</div>
+            </div>
+        </div>
+
+        <!-- Multi-Tab Investigative Console Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="tab-ingestion">
+                <span class="tab-icon">🗄️</span> Tab 1: Evidence Ingestion
+            </button>
+            <button class="tab-btn" data-tab="tab-timeline">
+                <span class="tab-icon">⏱️</span> Tab 2: Multimodal Master Timeline
+            </button>
+            <button class="tab-btn" data-tab="tab-3d">
+                <span class="tab-icon">🌐</span> Tab 3: Interactive 3D Scene Viewer
+            </button>
+            <button class="tab-btn" data-tab="tab-chat">
+                <span class="tab-icon">💬</span> Tab 4: AI Forensic Chatbot
+            </button>
+            <button class="tab-btn" data-tab="tab-custody">
+                <span class="tab-icon">📜</span> Tab 5: Chain of Custody & PDF Export
+            </button>
+        </nav>
+
+        <!-- Tab Content Panes -->
+        <div class="tab-panes">
+
+            <!-- ============================================================ -->
+            <!-- TAB 1: EVIDENCE INGESTION                                    -->
+            <!-- ============================================================ -->
+            <div class="tab-pane active" id="tab-ingestion">
+                <div class="grid-2col">
+                    
+                    <!-- Left: Upload & Ingestion Controls -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span>📥 Ingest Digital Evidence & Compute Hashes</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Case Identifier</label>
+                            <input type="text" id="case-id-input" class="form-control" value="CV-2026-0891">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Incident Location</label>
+                            <input type="text" id="incident-location-input" class="form-control" value="Metropolitan Transit Terminal, Sector 4">
+                        </div>
+
+                        <!-- Drag and Drop Image Dropzone -->
+                        <div class="form-group">
+                            <label class="form-label">1. Crime Scene Still Imagery (RT-DETR & BLIP)</label>
+                            <div class="dropzone" id="image-dropzone">
+                                <div class="dropzone-icon">📷</div>
+                                <div class="dropzone-text"><strong>Drag & drop crime scene image</strong> or click to browse</div>
+                                <div class="dropzone-sub">Supported formats: JPG, PNG, WEBP (Max 50MB)</div>
+                                <input type="file" id="image-input" class="file-input-hidden" accept="image/*">
+                            </div>
+                            <div id="image-file-info" class="file-badge-hidden"></div>
+                            <button type="button" class="btn btn-sm btn-indigo mt-2" onclick="analyzeSingleModality('image')">
+                                🔍 Run Image Forensic Engine
+                            </button>
+                        </div>
+
+                        <!-- Drag and Drop Audio Dropzone -->
+                        <div class="form-group">
+                            <label class="form-label">2. Acoustic & 911 Dispatch Audio (OpenAI Whisper)</label>
+                            <div class="dropzone" id="audio-dropzone">
+                                <div class="dropzone-icon">🎙️</div>
+                                <div class="dropzone-text"><strong>Drag & drop audio recording</strong> or click to browse</div>
+                                <div class="dropzone-sub">Supported formats: WAV, MP3, M4A, FLAC</div>
+                                <input type="file" id="audio-input" class="file-input-hidden" accept="audio/*">
+                            </div>
+                            <div id="audio-file-info" class="file-badge-hidden"></div>
+                            <button type="button" class="btn btn-sm btn-indigo mt-2" onclick="analyzeSingleModality('audio')">
+                                🔍 Run Audio Forensic Engine
+                            </button>
+                        </div>
+
+                        <!-- Drag and Drop Video Dropzone -->
+                        <div class="form-group">
+                            <label class="form-label">3. CCTV Surveillance Footage (OpenCV Motion & Anomaly Spikes)</label>
+                            <div class="dropzone" id="video-dropzone">
+                                <div class="dropzone-icon">🎥</div>
+                                <div class="dropzone-text"><strong>Drag & drop CCTV video clip</strong> or click to browse</div>
+                                <div class="dropzone-sub">Supported formats: MP4, AVI, MOV, WEBM</div>
+                                <input type="file" id="video-input" class="file-input-hidden" accept="video/*">
+                            </div>
+                            <div id="video-file-info" class="file-badge-hidden"></div>
+                            <button type="button" class="btn btn-sm btn-indigo mt-2" onclick="analyzeSingleModality('video')">
+                                🔍 Run Video Forensic Engine
+                            </button>
+                        </div>
+
+                        <!-- Witness Testimony Text Area -->
+                        <div class="form-group">
+                            <label class="form-label">4. Witness Testimony & Field Officer Statements</label>
+                            <textarea id="witness-notes-input" class="form-control" rows="3">Witness Statement (Terminal Guard #04): At 21:40, suspect exited North stairwell wearing dark hoodie and carrying silver metallic briefcase. Gunshots reported, followed by vehicle flight in dark sedan with plate ending 89.</textarea>
+                        </div>
+
+                        <!-- Master Fusion Button -->
+                        <button type="button" class="btn btn-primary btn-block btn-lg" onclick="triggerMultimodalFusion()">
+                            🚀 Execute Multimodal Forensic Fusion (Groq LLM)
+                        </button>
+                    </div>
+
+                    <!-- Right: Ingested Evidence Telemetry & Inspection Previews -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span>📡 Real-Time Telemetry & Engine Inspection</span>
+                        </div>
+
+                        <!-- Image Preview Box -->
+                        <div class="telemetry-block">
+                            <div class="telemetry-header">
+                                <strong>Computer Vision Optical Preview</strong>
+                                <span class="badge badge-indigo" id="image-status-badge">STANDBY</span>
+                            </div>
+                            <div id="image-preview-container" class="preview-box">
+                                <div class="empty-state">No image uploaded. Baseline surveillance HUD active.</div>
+                            </div>
+                            <div id="image-telemetry-text" class="telemetry-notes">
+                                <em>BLIP Scene Interpretation and RT-DETR localized bounding boxes will display here upon execution.</em>
+                            </div>
+                        </div>
+
+                        <!-- Audio Telemetry Box -->
+                        <div class="telemetry-block mt-3">
+                            <div class="telemetry-header">
+                                <strong>Acoustic & Whisper Telemetry</strong>
+                                <span class="badge badge-emerald" id="audio-status-badge">STANDBY</span>
+                            </div>
+                            <div id="audio-telemetry-text" class="telemetry-notes">
+                                <em>Whisper speech transcription segments and acoustic concussive distress peaks will render here.</em>
+                            </div>
+                        </div>
+
+                        <!-- Video Telemetry Box -->
+                        <div class="telemetry-block mt-3">
+                            <div class="telemetry-header">
+                                <strong>CCTV Surveillance & Keyframe Anomaly Spikes</strong>
+                                <span class="badge badge-amber" id="video-status-badge">STANDBY</span>
+                            </div>
+                            <div id="video-telemetry-text" class="telemetry-notes">
+                                <em>OpenCV frame sampling metrics (sample_fps=2), motion bursts, and threat level classifications will appear here.</em>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- TAB 2: MULTIMODAL MASTER TIMELINE                            -->
+            <!-- ============================================================ -->
+            <div class="tab-pane" id="tab-timeline">
+                <div class="card">
+                    <div class="card-header-flex">
+                        <div class="card-title">
+                            <span>⏱️ Unified Chronological Forensic Master Timeline</span>
+                        </div>
+                        <div class="timeline-filters">
+                            <span class="filter-label">Filter Threat:</span>
+                            <button class="btn btn-xs btn-outline active" onclick="filterTimeline('ALL')">All</button>
+                            <button class="btn btn-xs btn-outline text-crimson" onclick="filterTimeline('HIGH')">High</button>
+                            <button class="btn btn-xs btn-outline text-amber" onclick="filterTimeline('MEDIUM')">Medium</button>
+                            <button class="btn btn-xs btn-outline text-emerald" onclick="filterTimeline('LOW')">Low</button>
+                        </div>
+                    </div>
+
+                    <p class="section-desc">
+                        A gap-free chronological reconstruction aligning optical detections, Whisper audio transcripts, OpenCV motion surges, and witness accounts with cross-modal corroboration tags.
+                    </p>
+
+                    <div class="table-responsive">
+                        <table class="timeline-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 110px;">Timestamp</th>
+                                    <th style="width: 140px;">Source Modality</th>
+                                    <th>Forensic Event Observation & Corroboration Details</th>
+                                    <th style="width: 110px;">Threat Level</th>
+                                    <th style="width: 110px;">Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody id="master-timeline-body">
+                                <tr data-threat="LOW">
+                                    <td class="time-stamp">21:38:10 UTC</td>
+                                    <td><span class="modality-tag">CCTV-04</span></td>
+                                    <td>Dark sedan arrives in commercial bay; driver idles with running lights.</td>
+                                    <td><span class="threat-pill threat-low">LOW</span></td>
+                                    <td><span class="conf-verified">Verified</span></td>
+                                </tr>
+                                <tr data-threat="MEDIUM">
+                                    <td class="time-stamp">21:40:02 UTC</td>
+                                    <td><span class="modality-tag">Witness & CCTV</span></td>
+                                    <td>Subject egresses North stairwell holding metallic briefcase. <em>(Cross-modal match: Video Frame #450)</em></td>
+                                    <td><span class="threat-pill threat-med">MEDIUM</span></td>
+                                    <td><span class="conf-corroborated">Corroborated</span></td>
+                                </tr>
+                                <tr data-threat="HIGH">
+                                    <td class="time-stamp">21:40:22 UTC</td>
+                                    <td><span class="modality-tag">Whisper Audio</span></td>
+                                    <td>Ballistics: Acoustic transient discharge reported; witness distress call logged.</td>
+                                    <td><span class="threat-pill threat-high">HIGH</span></td>
+                                    <td><span class="conf-verified">Verified</span></td>
+                                </tr>
+                                <tr data-threat="HIGH">
+                                    <td class="time-stamp">21:41:12 UTC</td>
+                                    <td><span class="modality-tag">CCTV-02</span></td>
+                                    <td>Vehicle departs eastbound onto State Avenue transit corridor. <em>(Egress velocity: 45 mph)</em></td>
+                                    <td><span class="threat-pill threat-high">HIGH</span></td>
+                                    <td><span class="conf-verified">Verified</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- TAB 3: THREE.JS 3D SCENE RECONSTRUCTION                     -->
+            <!-- ============================================================ -->
+            <div class="tab-pane" id="tab-3d">
+                <div class="card">
+                    <div class="card-header-flex">
+                        <div class="card-title">
+                            <span>🌐 Three.js 3D Spatial Crime Scene Reconstruction & Trajectory Map</span>
+                        </div>
+                        <div class="scene-controls-panel">
+                            <button class="control-btn" onclick="window.crime3D && window.crime3D.setPresetCamera('overview')">Overview</button>
+                            <button class="control-btn" onclick="window.crime3D && window.crime3D.setPresetCamera('top')">Top-Down</button>
+                            <button class="control-btn" onclick="window.crime3D && window.crime3D.setPresetCamera('egress')">Stairwell Egress (EV-01)</button>
+                            <button class="control-btn" onclick="window.crime3D && window.crime3D.setPresetCamera('vehicle')">Loading Bay (EV-03)</button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Canvas Viewport -->
+                    <div class="scene-3d-wrapper">
+                        <div id="three-canvas"></div>
+                        <div class="scene-overlay">
+                            <strong>Metropolitan Transit Terminal — 3D Spatial Map</strong><br>
+                            <span>Click markers for metadata. Left-click to orbit, right-click to pan, scroll to zoom.</span>
+                        </div>
+                    </div>
+
+                    <!-- Selected Marker Inspector Panel -->
+                    <div id="selected-marker-info" class="marker-inspector">
+                        <div class="inspector-title">Evidence Marker Inspector</div>
+                        <div id="marker-details-content" class="inspector-body">
+                            <em>Click any 3D spatial marker (EV-01, EV-02, EV-03) above to inspect registered spatial coordinates, weapon localization, and forensic vectors.</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- TAB 4: AI FORENSIC CHATBOT                                   -->
+            <!-- ============================================================ -->
+            <div class="tab-pane" id="tab-chat">
+                <div class="card">
+                    <div class="card-title">
+                        <span>💬 Investigator Forensic Copilot (Groq LLM Interrogation)</span>
+                    </div>
+
+                    <p class="section-desc">
+                        Strictly grounded in ingested physical media, RT-DETR visual detections, Whisper acoustic logs, and witness statements. All responses cite specific timestamps and frame IDs.
+                    </p>
+
+                    <!-- Quick Query Chips -->
+                    <div class="chip-row">
+                        <span class="query-chip" onclick="askChipQuery('What weapons or tactical items were identified in the crime scene?')">🔍 Weapons Identified?</span>
+                        <span class="query-chip" onclick="askChipQuery('List all witness contradictions vs hard digital evidence.')">⚠️ Contradictions vs Media?</span>
+                        <span class="query-chip" onclick="askChipQuery('Describe the getaway vehicle and direction of flight.')">🚗 Getaway Vehicle Details?</span>
+                        <span class="query-chip" onclick="askChipQuery('Reconstruct the suspect sequence of events between 21:38 and 21:42 UTC.')">⏱️ Reconstruct Timeline?</span>
+                    </div>
+
+                    <!-- Chat Log Window -->
+                    <div class="chat-box">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-msg chat-bot">
+                                <strong>CrimeVision Copilot:</strong> Case dossier CV-2026-0891 indexed. All evidence hashes, RT-DETR visual detections, Whisper acoustic logs, and witness statements are grounded in memory. Ask any investigative question.
+                            </div>
+                        </div>
+                        <div class="chat-input-bar">
+                            <input type="text" id="chat-query-input" class="form-control" placeholder="Ask a forensic question regarding this incident..." onkeypress="handleChatEnter(event)">
+                            <button type="button" class="btn btn-primary" onclick="submitChatMessage()">Query Copilot</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- TAB 5: CHAIN OF CUSTODY & PDF EXPORT                         -->
+            <!-- ============================================================ -->
+            <div class="tab-pane" id="tab-custody">
+                <div class="grid-2col">
+                    
+                    <!-- Left: Cryptographic Chain of Custody Table -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span>📜 Cryptographic Chain of Custody Register</span>
+                        </div>
+                        <p class="section-desc">
+                            Digital evidence custody tracking using unalterable SHA-256 cryptographic checksums.
+                        </p>
+
+                        <div class="table-responsive">
+                            <table class="custody-table">
+                                <thead>
+                                    <tr>
+                                        <th>Artifact</th>
+                                        <th>Modality</th>
+                                        <th>Size</th>
+                                        <th>SHA-256 Checksum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="custody-register-body">
+                                    <tr>
+                                        <td><strong>cctv_exterior_cam04.mp4</strong></td>
+                                        <td>Video</td>
+                                        <td>2.4 MB</td>
+                                        <td class="font-mono text-cyan">5e884898da28047151d0e56f8dc62927...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>dispatch_recording.wav</strong></td>
+                                        <td>Audio</td>
+                                        <td>512 KB</td>
+                                        <td class="font-mono text-cyan">9f86d081884c7d659a2feaa0c55ad015...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>surveillance_frame_01.jpg</strong></td>
+                                        <td>Image</td>
+                                        <td>142 KB</td>
+                                        <td class="font-mono text-cyan">e3b0c44298fc1c149afbf4c8996fb924...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Groq Case Brief & PDF Export Action -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span>📄 Court-Admissible Forensic Dossier Export</span>
+                        </div>
+
+                        <div id="brief-preview-box" class="brief-box">
+                            <h4 id="brief-title" class="text-indigo">Armed Commercial Robbery & Conspiracy (Penal Code § 211)</h4>
+                            <div class="mt-2">
+                                <strong>Executive Summary:</strong>
+                                <p id="brief-summary" class="text-muted mt-1">
+                                    Multi-sensor digital evidence synthesis establishes a high-probability coordinated armed commercial robbery. Evidence reflects pre-planned transit corridor egress, ballistic discharge at T+22s, and transport rendezvous in the commercial loading bay.
+                                </p>
+                            </div>
+                            <div class="mt-3">
+                                <strong>Investigative Scenarios (Groq Hypotheses):</strong>
+                                <ul id="brief-hypotheses" class="hypotheses-list mt-1">
+                                    <li><strong>Scenario A:</strong> Coordinated heist utilizing pre-positioned transport in commercial bay.</li>
+                                    <li><strong>Scenario B:</strong> Opportunistic assault and flight following security encounter.</li>
+                                    <li><strong>Scenario C:</strong> Decoy diversion to mask secondary storage vault access.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="/api/export-pdf" class="btn btn-primary btn-block btn-lg" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                                ⬇️ Download Official Forensic Report (PDF)
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 3D Scene Reconstruction Engine -->
+    <script src="/static/js/crime_scene_3d.js"></script>
+    <!-- Main Interactive Client Application -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

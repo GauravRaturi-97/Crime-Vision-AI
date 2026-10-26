@@ -1,0 +1,16 @@
+# Large Model Weights (Critical: prevents GitHub 100MB push block)
+*.pt
+*.pth
+*.bin
+*.onnx
+
+# Environment and Secret API Keys
+.env
+*.env
+
+# Outputs and caches
+outputs/
+__pycache__/
+*.pyc
+.venv/
+venv/
